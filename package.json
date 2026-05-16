@@ -1,0 +1,57 @@
+{
+  "name": "e2e-mobiletesting-ai-driven",
+  "version": "1.0.0",
+  "description": "MobileWright TypeScript Mobile Testing Framework with Page Object Model",
+  "main": "index.js",
+  "scripts": {
+    "test": "mobilewright test",
+    "test:android": "mobilewright test",
+    "test:all": "mobilewright test tests/",
+    "test:welcome": "mobilewright test tests/sgalert.spec.ts",
+    "test:navigation": "mobilewright test tests/sgalert-navigation.spec.ts",
+    "test:complete": "mobilewright test tests/sgalert-complete-flow.spec.ts",
+    "test:pom": "mobilewright test tests/sgalert-complete-flow-pom.spec.ts",
+    "test:smoke": "mobilewright test tests/sgalert.spec.ts tests/sgalert-navigation.spec.ts",
+    "inspect-ui": "node inspect-ui.js",
+    "device:check": "adb devices",
+    "device:restart": "adb kill-server && adb start-server",
+    "app:install": "adb install ./apk/android.apk/sgAlert_Android.apk",
+    "app:uninstall": "adb uninstall com.senecaglobal.sgalert.internal",
+    "app:clear": "adb shell pm clear com.senecaglobal.sgalert.internal",
+    "clean:results": "rmdir /s /q test-results 2>nul || true",
+    "help": "echo Available commands: test, test:all, test:pom, test:smoke, inspect-ui, device:check"
+  },
+  "keywords": [
+    "mobile-testing",
+    "automation",
+    "mobilewright",
+    "typescript",
+    "android",
+    "page-object-model",
+    "e2e-testing",
+    "ai-driven",
+    "test-automation"
+  ],
+  "author": "Suresh Tippana - Automation Architect",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sureshtippana-automationarchitect/e2e-mobiletesting-ai-driven.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sureshtippana-automationarchitect/e2e-mobiletesting-ai-driven/issues"
+  },
+  "homepage": "https://github.com/sureshtippana-automationarchitect/e2e-mobiletesting-ai-driven#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "@mobilewright/test": "^0.0.35",
+    "mobilewright": "^0.0.35"
+  },
+  "devDependencies": {
+    "@types/node": "^25.8.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
