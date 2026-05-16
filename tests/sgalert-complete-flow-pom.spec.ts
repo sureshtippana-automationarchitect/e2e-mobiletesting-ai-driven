@@ -14,6 +14,21 @@ import { SGAlertPage } from '../pages/SGAlertPage';
  * If you see network errors, ensure your device/emulator has internet access.
  */
 
+// Automatic screenshot capture on test failure
+test.afterEach(async ({ device, screen }, testInfo) => {
+  // Check if test failed
+  if (testInfo.status !== 'passed') {
+    console.log(`\n❌ Test Failed: ${testInfo.title}`);
+    
+    // Create helper instance to capture failure screenshot
+    const { HelperMethods } = await import('../helpers/HelperMethods');
+    const helper = new HelperMethods(screen, device);
+    
+    // Take failure screenshot with test name
+    await helper.takeFailureScreenshot(testInfo.title);
+  }
+});
+
 // Test 1: Complete onboarding flow - Happy path using POM
 test('POM: Complete app onboarding successfully', async ({ device, screen }) => {
   // Initialize Page Object
@@ -43,8 +58,8 @@ test('POM: Skip welcome screen using Skip button', async ({ device, screen }) =>
   // Verify we landed on permissions screen
   await sgAlertPage.verifyPermissionsScreen();
 
-  await sgAlertPage.takeScreenshot('After Skip Flow');
-  await sgAlertPage.wait(2000);
+  await sgAlertPage.getHelperMethods().takeScreenshot('After Skip Flow');
+  await sgAlertPage.getHelperMethods().wait(2000);
 });
 
 
@@ -61,8 +76,8 @@ test('POM: Verify permission approval statuses', async ({ device, screen }) => {
   // Verify permission statuses
   await sgAlertPage.verifyPermissionStatuses();
 
-  await sgAlertPage.takeScreenshot('Permission Statuses');
-  await sgAlertPage.wait(2000);
+  await sgAlertPage.getHelperMethods().takeScreenshot('Permission Statuses');
+  await sgAlertPage.getHelperMethods().wait(2000);
 });
 
 
@@ -84,8 +99,8 @@ test('POM: Verify Terms of Use checkbox interaction', async ({ device, screen })
   // Tap checkbox
   await sgAlertPage.tapTermsCheckbox();
 
-  await sgAlertPage.takeScreenshot('Terms Checkbox');
-  await sgAlertPage.wait(2000);
+  await sgAlertPage.getHelperMethods().takeScreenshot('Terms Checkbox');
+  await sgAlertPage.getHelperMethods().wait(2000);
 });
 
 
@@ -138,7 +153,7 @@ test('POM: Verify all permissions are displayed on screen', async ({ device, scr
   // Verify all permissions
   await sgAlertPage.verifyAllPermissions();
 
-  await sgAlertPage.takeScreenshot('All Permissions');
+  await sgAlertPage.getHelperMethods().takeScreenshot('All Permissions');
 
   console.log("🎉 ============ ALL PERMISSIONS VERIFIED ============\n");
 });

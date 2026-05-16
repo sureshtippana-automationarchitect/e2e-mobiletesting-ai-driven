@@ -1,5 +1,15 @@
 import { test, expect } from '@mobilewright/test';
 
+// Automatic screenshot capture on test failure
+test.afterEach(async ({ device, screen }, testInfo) => {
+  if (testInfo.status !== 'passed') {
+    console.log(`\n❌ Test Failed: ${testInfo.title}`);
+    const { HelperMethods } = await import('../helpers/HelperMethods');
+    const helper = new HelperMethods(screen, device);
+    await helper.takeFailureScreenshot(testInfo.title);
+  }
+});
+
 test('Launch sgAlert Android App', async ({ device, screen }) => {
 
   console.log("\n🚀 ============ STARTING TEST ============");

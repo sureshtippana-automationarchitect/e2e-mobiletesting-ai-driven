@@ -8,6 +8,16 @@ import { test, expect } from '@mobilewright/test';
  * If you see network errors, ensure your device/emulator has internet access.
  */
 
+// Automatic screenshot capture on test failure
+test.afterEach(async ({ device, screen }, testInfo) => {
+  if (testInfo.status !== 'passed') {
+    console.log(`\n❌ Test Failed: ${testInfo.title}`);
+    const { HelperMethods } = await import('../helpers/HelperMethods');
+    const helper = new HelperMethods(screen, device);
+    await helper.takeFailureScreenshot(testInfo.title);
+  }
+});
+
 // Test 1: Complete onboarding flow - Happy path
 test('Complete app onboarding successfully', async ({ device, screen }) => {
 

@@ -59,9 +59,9 @@ export class SGAlertPage extends BasePage {
   // Element getter - always fresh, never stale
   public get sgAlertPageElements() {
     return {
-      welcomeHeading: this.helper.getElementByText('Welcome to SG Alert'),
-      nextButton: this.helper.getElementByText('Next >'),
-      skipButton: this.helper.getElementByText('Skip'),
+      welcomeHeading: this.screen.getByText('Welcome to SG Alert'),
+      nextButton: this.screen.getByText('Next >'),
+      skipButton: this.screen.getByText('Skip'),
     };
   }
 
@@ -255,21 +255,30 @@ Example:
 import { BasePage } from './BasePage';
 
 export class LoginPage extends BasePage {
-  private readonly locators = {
-    emailField: 'Email',
-    passwordField: 'Password',
-    loginButton: 'Login',
-  };
+  // Use element getter pattern
+  public get loginPageElements() {
+    return {
+      emailField: this.screen.getByText('Email'),
+      passwordField: this.screen.getByText('Password'),
+      loginButton: this.screen.getByText('Login'),
+    };
+  }
 
-  async login(email: string, password: string) {
-    const emailField = this.getElementByText(this.locators.emailField);
-    await this.type(emailField, email, 'Email');
-    
-    const passwordField = this.getElementByText(this.locators.passwordField);
-    await this.type(passwordField, password, 'Password');
-    
-    const loginButton = this.getElementByText(this.locators.loginButton);
-    await this.tap(loginButton, 'Login button');
+  async login(email: string, password: string): Promise<void> {
+    await this.helper.fillInput(
+      this.loginPageElements.emailField,
+      email,
+      '✓ Filled email'
+    );
+    await this.helper.fillInput(
+      this.loginPageElements.passwordField,
+      password,
+      '✓ Filled password'
+    );
+    await this.helper.tapElement(
+      this.loginPageElements.loginButton,
+      '✓ Clicked Login button'
+    );
   }
 }
 ```

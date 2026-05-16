@@ -6,6 +6,16 @@ import { test, expect } from '@mobilewright/test';
  * Run `node inspect-ui.js` anytime to see available elements
  */
 
+// Automatic screenshot capture on test failure
+test.afterEach(async ({ device, screen }, testInfo) => {
+  if (testInfo.status !== 'passed') {
+    console.log(`\n❌ Test Failed: ${testInfo.title}`);
+    const { HelperMethods } = await import('../helpers/HelperMethods');
+    const helper = new HelperMethods(screen, device);
+    await helper.takeFailureScreenshot(testInfo.title);
+  }
+});
+
 test('Navigate through SG Alert onboarding', async ({ device, screen }) => {
 
   console.log("\n🚀 ============ STARTING TEST ============");

@@ -13,7 +13,7 @@ A scalable and maintainable end-to-end (E2E) mobile test automation framework bu
 - ✅ **Centralized Locators** - All locators organized in page objects
 - ✅ **Android Testing** - Native Android app testing support
 - ✅ **BasePage Pattern** - Reusable helper methods (tap, type, swipe, wait, etc.)
-- ✅ **Screenshot Capture** - Built-in screenshot utilities for test evidence
+- ✅ **Smart Screenshot Capture** - Automatic screenshots on test failure + manual capture with datetime organization
 - ✅ **Comprehensive Logging** - Detailed console logs with emojis for clarity
 - ✅ **Organized Test Structure** - Clean separation of concerns
 - ✅ **Detailed Documentation** - Multiple guides for locators, troubleshooting, and testing
@@ -536,12 +536,38 @@ await basePage.wait(2000);
 
 ### Screenshot Strategy
 
+#### Manual Screenshots
 ```typescript
 // Take screenshot at key points
-await sgAlertPage.takeScreenshot('After Login');
-await sgAlertPage.takeScreenshot('Welcome Screen');
-await sgAlertPage.takeScreenshot('Permission Statuses');
+await sgAlertPage.getHelperMethods().takeScreenshot('After Login');
+await sgAlertPage.getHelperMethods().takeScreenshot('Welcome Screen');
+await sgAlertPage.getHelperMethods().takeScreenshot('Permission Statuses');
+
+// Screenshots saved to: screenshots/{YYYY-MM-DD-HH-MM-SS}/{description}.png
 ```
+
+#### Automatic Failure Screenshots
+All test files automatically capture screenshots when tests fail:
+
+```typescript
+// Added to every test file
+test.afterEach(async ({ device, screen }, testInfo) => {
+  if (testInfo.status !== 'passed') {
+    const { HelperMethods } = await import('../helpers/HelperMethods');
+    const helper = new HelperMethods(screen, device);
+    await helper.takeFailureScreenshot(testInfo.title);
+  }
+});
+
+// Failed test screenshots saved to: 
+// screenshots/FailedTestcases/{YYYY-MM-DD-HH-MM-SS}/{TestName}.png
+```
+
+**Benefits:**
+- ✅ Automatic capture on test failure
+- ✅ Organized by timestamp in separate FailedTestcases folder
+- ✅ Named after the failed test for easy identification
+- ✅ No manual intervention needed
 
 ### Permission Testing
 

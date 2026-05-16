@@ -13,7 +13,7 @@ The `HelperMethods` class provides a comprehensive set of utility methods for mo
 - **Validations**: `validate()`, `validateValue()`, `validateTextContains()`
 - **Mobile Gestures**: `swipe()`, `scrollToElement()`, `longPress()`, `doubleTapElement()`
 - **App Lifecycle**: `launchApp()`, `terminateApp()`, `restartApp()`
-- **Utilities**: `takeScreenshot()`, `getCurrentDateTime()`, `getText()`, `isVisible()`
+- **Utilities**: `takeScreenshot()`, `takeFailureScreenshot()`, `getFormattedTimestamp()`, `getText()`, `isVisible()`
 
 ### Usage Pattern
 

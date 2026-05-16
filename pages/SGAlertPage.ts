@@ -34,27 +34,27 @@ export class SGAlertPage extends BasePage {
   public get sgAlertPageElements() {
     return {
       // Welcome Screen
-      welcomeHeading: this.helper.getElementByText('Welcome to SG Alert'),
-      nextButton: this.helper.getElementByText('Next >'),
-      skipButton: this.helper.getElementByText('Skip'),
+      welcomeHeading: this.screen.getByText('Welcome to SG Alert'),
+      nextButton: this.screen.getByText('Next >'),
+      skipButton: this.screen.getByText('Skip'),
 
       // Why Permissions Screen
-      whyPermissionsHeading: this.helper.getElementByText('Why are we requesting permissions?'),
-      continueButton: this.helper.getElementByText('Continue'),
+      whyPermissionsHeading: this.screen.getByText('Why are we requesting permissions?'),
+      continueButton: this.screen.getByText('Continue'),
 
       // Permissions Screen
-      permissionsHeading: this.helper.getElementByText('App Permissions'),
-      pushNotificationText: this.helper.getElementByText(/Push Notification Access/i),
-      locationText: this.helper.getElementByText(/Location Access/i),
-      dndText: this.helper.getElementByText(/Do Not Disturb/i),
-      permissionApproved: this.helper.getElementByText(/Permission approved/i),
-      permissionDenied: this.helper.getElementByText(/Permission denied/i),
-      goToSettingsButton: this.helper.getElementByText('Go to Settings'),
+      permissionsHeading: this.screen.getByText('App Permissions'),
+      pushNotificationText: this.screen.getByText(/Push Notification Access/i),
+      locationText: this.screen.getByText(/Location Access/i),
+      dndText: this.screen.getByText(/Do Not Disturb/i),
+      permissionApproved: this.screen.getByText(/Permission approved/i),
+      permissionDenied: this.screen.getByText(/Permission denied/i),
+      goToSettingsButton: this.screen.getByText('Go to Settings'),
 
       // Terms and Conditions
-      termsCheckbox: this.helper.getElementByText(/I agree to the Terms of Use/i),
-      privacyPolicyLink: this.helper.getElementByText(/Privacy Policy/i),
-      getStartedButton: this.helper.getElementByText('Get Started'),
+      termsCheckbox: this.screen.getByText(/I agree to the Terms of Use/i),
+      privacyPolicyLink: this.screen.getByText(/Privacy Policy/i),
+      getStartedButton: this.screen.getByText('Get Started'),
     };
   }
 

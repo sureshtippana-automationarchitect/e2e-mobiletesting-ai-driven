@@ -19,7 +19,9 @@
     "app:uninstall": "adb uninstall com.senecaglobal.sgalert.internal",
     "app:clear": "adb shell pm clear com.senecaglobal.sgalert.internal",
     "clean:results": "rmdir /s /q test-results 2>nul || true",
-    "help": "echo Available commands: test, test:all, test:pom, test:smoke, inspect-ui, device:check"
+    "clean:screenshots": "rmdir /s /q screenshots 2>nul || true",
+    "clean:all": "npm run clean:results && npm run clean:screenshots",
+    "help": "echo Available commands: test, test:all, test:pom, test:smoke, inspect-ui, device:check, clean:screenshots"
   },
   "keywords": [
     "mobile-testing",

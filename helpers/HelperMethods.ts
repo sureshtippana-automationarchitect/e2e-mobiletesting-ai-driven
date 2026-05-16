@@ -185,12 +185,72 @@ export class HelperMethods {
     }
 
     /**
-     * Take screenshot
+     * Take screenshot and save to datetime-based folder
      * @param description - Description for the screenshot
      */
     async takeScreenshot(description: string = 'current screen'): Promise<void> {
-        console.log(`📸 Taking screenshot: ${description}`);
-        await this.screen.screenshot();
+        const timestamp = await this.getFormattedTimestamp();
+        const screenshotPath = `screenshots/${timestamp}`;
+        
+        // Create directory if it doesn't exist (mkdir -p equivalent)
+        const fs = require('fs');
+        const path = require('path');
+        
+        if (!fs.existsSync('screenshots')) {
+            fs.mkdirSync('screenshots', { recursive: true });
+        }
+        
+        if (!fs.existsSync(screenshotPath)) {
+            fs.mkdirSync(screenshotPath, { recursive: true });
+        }
+        
+        // Sanitize description for filename (remove special characters)
+        const sanitizedDescription = description.replace(/[^a-zA-Z0-9-_]/g, '-');
+        const fileName = `${sanitizedDescription}-${Date.now()}.png`;
+        const fullPath = path.join(screenshotPath, fileName);
+        
+        console.log(`📸 Taking screenshot: ${description} → ${fullPath}`);
+        await this.screen.screenshot({ path: fullPath });
+    }
+
+    /**
+     * Take screenshot for failed test case
+     * Saves to screenshots/FailedTestcases/{DateStamp}/{TestCaseName}.png
+     * @param testName - Name of the failed test
+     */
+    async takeFailureScreenshot(testName: string): Promise<void> {
+        const timestamp = await this.getFormattedTimestamp();
+        const screenshotPath = `screenshots/FailedTestcases/${timestamp}`;
+        
+        // Create directory if it doesn't exist
+        const fs = require('fs');
+        const path = require('path');
+        
+        if (!fs.existsSync('screenshots')) {
+            fs.mkdirSync('screenshots', { recursive: true });
+        }
+        
+        if (!fs.existsSync('screenshots/FailedTestcases')) {
+            fs.mkdirSync('screenshots/FailedTestcases', { recursive: true });
+        }
+        
+        if (!fs.existsSync(screenshotPath)) {
+            fs.mkdirSync(screenshotPath, { recursive: true });
+        }
+        
+        // Sanitize test name for filename
+        const sanitizedTestName = testName.replace(/[^a-zA-Z0-9-_]/g, '-');
+        const fileName = `${sanitizedTestName}.png`;
+        const fullPath = path.join(screenshotPath, fileName);
+        
+        console.log(`❌ Test Failed - Taking screenshot: ${testName} → ${fullPath}`);
+        
+        try {
+            await this.screen.screenshot({ path: fullPath });
+            console.log(`✅ Failure screenshot saved successfully`);
+        } catch (error) {
+            console.log(`⚠️  Could not capture failure screenshot: ${error}`);
+        }
     }
 
     /**
@@ -203,19 +263,20 @@ export class HelperMethods {
     }
 
     /**
-     * Get current date and time in MMDDHHmmss format
-     * @returns Formatted date-time string
+     * Get current date and time in YYYY-MM-DD-HH-MM-SS format
+     * @returns Formatted date-time string (e.g., 2026-05-16-14-30-25)
      */
-    async getCurrentDateTime(): Promise<string> {
+    async getFormattedTimestamp(): Promise<string> {
         const now = new Date();
         console.log("date is:", now);
+        const year = now.getFullYear();
         const month = (now.getMonth() + 1).toString().padStart(2, '0');
         const day = now.getDate().toString().padStart(2, '0');
         const hours = now.getHours().toString().padStart(2, '0');
         const minutes = now.getMinutes().toString().padStart(2, '0');
         const seconds = now.getSeconds().toString().padStart(2, '0');
 
-        return `${month}${day}${hours}${minutes}${seconds}`;
+        return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
     }
 
     /**
@@ -251,15 +312,6 @@ export class HelperMethods {
         // Implement long press based on your mobile testing framework capabilities
         await locator.press({ duration });
         console.log(logMessage);
-    }
-
-    /**
-     * Get element by text from screen
-     * @param text - Text to find (string or RegExp)
-     * @returns Element locator
-     */
-    getElementByText(text: string | RegExp): any {
-        return this.screen.getByText(text);
     }
 
     /**
