@@ -163,3 +163,4 @@ site/
 .stylelintcache
 *.stackdump
 *.code-workspace
+android.apk/

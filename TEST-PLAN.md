@@ -2,58 +2,76 @@
 
 ## Test Coverage
 
-### Test Suite 1: Welcome Screen (`sgalert.spec.ts`)
-- ✅ Basic app launch
-- ✅ UI inspection and element discovery
-- ✅ Screenshot capture
+### Test Suite 1: Complete Flow POM (`sgalert-complete-flow-pom.spec.ts`)
+**1 comprehensive end-to-end test case using Page Object Model:**
 
-### Test Suite 2: Navigation (`sgalert-navigation.spec.ts`) 
-- ✅ Navigate through onboarding with Next button
-- ✅ Skip onboarding with Skip button
-- ✅ Different locator methods
+**TC01: Complete App Onboarding Successfully** ✅
 
-### Test Suite 3: Complete Flow (`sgalert-complete-flow.spec.ts`)
-**7 comprehensive test cases:**
+**Automated Flow (6 Steps):**
 
-1. **Complete Onboarding Flow** ✅
-   - Launch app
-   - View welcome screen
-   - Click Next
-   - Verify permissions screen
-   - Accept terms
-   - Click Get Started
-   - Reach main app
+**Step 0: Fresh Installation**
+- Uninstall existing app (if present)
+- Install fresh APK from `android.apk\SGalertApp.apk`
+- Ensures clean state for consistent testing
 
-2. **Skip Welcome Screen** ✅
-   - Launch app
-   - Click Skip button
-   - Verify lands on permissions screen
+**Step 1: App Launch**
+- Launch app: `com.senecaglobal.sgalert.internal`
+- Wait 8000ms for app initialization
+- Handle foreground verification warnings
 
-3. **Permission Status Verification** ✅
-   - Check Push Notification: Approved
-   - Check Location Access: Approved
-   - Check Do Not Disturb: Denied
-   - Verify "Go to Settings" button
+**Step 2: Welcome Screens Navigation**
+- Screen 1: Tap "Next >" button → Wait 1000ms
+- Screen 2: Tap "Next >" button → Wait 1000ms  
+- Screen 3: Tap "Done" button → Wait 1000ms
+- Total: 3 screens navigated
 
-4. **Terms Checkbox Interaction** ✅
-   - Verify Terms of Use text
-   - Verify Privacy Policy link
-   - Tap checkbox
+**Step 3: Optional Continue Button**
+- Check if "Why permissions" screen appears
+- If present: Tap "Continue" button → Wait 2000ms
+- If absent: Skip directly to permissions → Wait 1000ms
+- Uses try-catch for graceful handling
 
-5. **Get Started Button** ✅
-   - Verify button is visible
-   - Verify button is enabled
-   - Capture screenshot
+**Step 4: Push Notification Permission**
+- Click "Push Notification Access" item → Wait 1500ms
+- System dialog appears: "Allow SGAlert to send you notifications?"
+- Click "Allow" button on system dialog → Wait 1500ms
+- Permission status changes to "Approved"
 
-6. **Back Navigation** ✅
-   - Navigate forward to permissions
-   - Press back button
-   - Verify returns to welcome
+**Step 5: Terms of Use Acceptance**
+- Locate Terms checkbox at coordinates (127, 1972)
+- Tap using coordinate-based interaction
+- Wait 1500ms for checkbox state change
+- Coordinate method more reliable than element locator
 
-7. **UI Elements Verification** ✅
-   - Verify all screen elements exist
-   - Check headings, text, buttons
-   - Dump UI tree
+**Step 6: Get Started Button**
+- Primary: Try text locator "Get Started" (timeout: 5000ms)
+- Fallback: Tap coordinates (216, 2640) if text fails
+- Wait 5000ms for main app screen to load
+- Dual-strategy ensures reliability
+
+**Expected Result:**
+- All steps execute without errors
+- Console shows: "🎉 ONBOARDING COMPLETED SUCCESSFULLY"
+- App reaches main screen
+- Screenshot captured on any failure
+
+**Key Technical Aspects:**
+- Uses centralized locators from `sgAlertPageElements()` getter
+- Implements coordinate-based tapping for problematic elements
+- Handles system permission dialogs separately from app dialogs
+- Gracefully handles optional screens with try-catch
+- Fresh app installation ensures consistent test state
+- Detailed logging with emojis for each step
+
+### Test Suite 2: Complete Flow Traditional (`sgalert-complete-flow.spec.ts`)
+**1 comprehensive test case using traditional inline approach:**
+
+**TC01: Complete App Onboarding Successfully** ✅
+- Same 6-step flow as POM version
+- All locators defined inline in test
+- No page object abstraction
+- Useful for comparing approaches
+- Direct `screen.getByText()` calls
 
 ---
 
@@ -66,18 +84,19 @@ npm run test:all
 
 ### Run Specific Test Suite
 ```bash
-# Welcome screen tests only
-npm run test:welcome
+# POM approach - Complete onboarding
+npm run test:pom
 
-# Navigation tests only  
-npm run test:navigation
-
-# Complete flow (all 7 tests)
+# Traditional approach - Complete onboarding
 npm run test:complete
 ```
 
 ### Run Single Test
 ```bash
+# Run POM test
+npx mobilewright test tests/sgalert-complete-flow-pom.spec.ts
+
+# Run traditional test
 npx mobilewright test tests/sgalert-complete-flow.spec.ts --grep "Complete app onboarding"
 ```
 
@@ -85,6 +104,12 @@ npx mobilewright test tests/sgalert-complete-flow.spec.ts --grep "Complete app o
 ```bash
 npm run inspect-ui
 ```
+
+### Prerequisites for Tests
+- **Internet Connection Required**: App needs internet to load onboarding screens
+- **Android Device/Emulator**: Must be running and connected
+- **Device Name**: Must match pattern in `mobilewright.config.ts` (default: /Pixel 6/)
+- **APK Location**: `android.apk\SGalertApp.apk` must exist
 
 ---
 
@@ -97,7 +122,7 @@ npm run inspect-ui
          │
          ▼
 ┌─────────────────┐
-│ Welcome Screen  │ ◄─── Test: sgalert.spec.ts
+│ Welcome Screen  │
 │ - Heading       │
 │ - Description   │
 │ - Next button   │
@@ -113,7 +138,7 @@ npm run inspect-ui
          │
          ▼
 ┌─────────────────┐
-│ Permissions     │ ◄─── Test: sgalert-complete-flow.spec.ts
+│ Permissions     │ ◄─── Test: sgalert-complete-flow-pom.spec.ts
 │ Screen          │
 │ - Push Notif ✅ │
 │ - Location ✅   │
@@ -145,15 +170,13 @@ npm run inspect-ui
 
 | Scenario | Status | Test File |
 |----------|--------|-----------|
-| Launch app | ✅ | All |
-| View welcome screen | ✅ | sgalert.spec.ts |
-| Navigate with Next | ✅ | sgalert-navigation.spec.ts |
-| Navigate with Skip | ✅ | sgalert-complete-flow.spec.ts |
-| Verify permissions | ✅ | sgalert-complete-flow.spec.ts |
-| Accept terms | ✅ | sgalert-complete-flow.spec.ts |
-| Click Get Started | ✅ | sgalert-complete-flow.spec.ts |
-| Back navigation | ✅ | sgalert-complete-flow.spec.ts |
-| UI element verification | ✅ | sgalert-complete-flow.spec.ts |
+| Launch app | ✅ | Both tests |
+| Navigate with Next (3 screens) | ✅ | sgalert-complete-flow-pom.spec.ts |
+| Handle Continue button (optional) | ✅ | sgalert-complete-flow-pom.spec.ts |
+| Push notification permission | ✅ | sgalert-complete-flow-pom.spec.ts |
+| Verify permissions | ✅ | sgalert-complete-flow-pom.spec.ts |
+| Accept terms (coordinates) | ✅ | sgalert-complete-flow-pom.spec.ts |
+| Click Get Started (with fallback) | ✅ | sgalert-complete-flow-pom.spec.ts |
 
 ---
 

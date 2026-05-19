@@ -7,20 +7,20 @@ This document contains visual representations of the mobile testing framework ar
 ```mermaid
 graph TB
     subgraph "Test Layer"
-        T[Test Files<br/>sgalert-complete-flow-pom.spec.ts]
+        T[Test Files<br/>sgalert-complete-flow-pom.spec.ts<br/>sgalert-complete-flow.spec.ts<br/>2 E2E Tests]
     end
     
     subgraph "Page Object Layer"
-        P[SGAlertPage<br/>- Element Getters<br/>- Action Methods<br/>- Flow Methods]
+        P[SGAlertPage<br/>- Centralized Locators (Getter)<br/>- Action Methods<br/>- Coordinate Tapping<br/>- System Dialog Handling<br/>- Flow Orchestration]
         B[BasePage<br/>- Initializes Helper<br/>- Provides Access]
     end
     
     subgraph "Helper Layer"
-        H[HelperMethods<br/>- Element Interactions<br/>- Validations<br/>- Mobile Gestures<br/>- App Lifecycle]
+        H[HelperMethods<br/>- Element Interactions<br/>- Validations<br/>- Mobile Gestures<br/>- App Lifecycle<br/>- Screenshots]
     end
     
     subgraph "Framework Layer"
-        MW[MobileWright<br/>Device, Screen]
+        MW[MobileWright<br/>Device, Screen<br/>Element Location<br/>Coordinate Tapping]
     end
     
     T -->|creates| P
@@ -29,6 +29,7 @@ graph TB
     B -->|initializes| H
     H -->|interacts with| MW
     T -->|provides| MW
+    P -->|direct access| MW
 
     style T fill:#e1f5ff
     style P fill:#fff4e1

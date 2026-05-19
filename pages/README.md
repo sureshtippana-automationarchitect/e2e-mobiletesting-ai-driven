@@ -98,6 +98,114 @@ export class MyPage extends BasePage {
 
 ## 📱 SGAlertPage - Page Object Class
 
+### Centralized Locator Pattern
+
+All locators are defined in the `sgAlertPageElements()` getter using a consistent pattern:
+
+```typescript
+public get sgAlertPageElements() {
+  return {
+    // Welcome Screen
+    welcomeHeading: this.screen.getByText('Welcome to SG Alert'),
+    nextButton: this.screen.getByText('Next >'),
+    doneButton: this.screen.getByText('Done'),
+    skipButton: this.screen.getByText('Skip'),
+
+    // Why Permissions Screen
+    whyPermissionsHeading: this.screen.getByText('Why are we requesting permissions?'),
+    continueButton: this.screen.getByText('Continue'),
+
+    // Permissions Screen
+    permissionsHeading: this.screen.getByText('App Permissions'),
+    pushNotificationText: this.screen.getByText(/Push Notification Access/i),
+    locationText: this.screen.getByText(/Location Access/i),
+    dndText: this.screen.getByText(/Do Not Disturb/i),
+    permissionApproved: this.screen.getByText(/Permission approved/i),
+    permissionDenied: this.screen.getByText(/Permission denied/i),
+    goToSettingsButton: this.screen.getByText('Go to Settings'),
+    
+    // System Dialog
+    allowButton: this.screen.getByText('Allow'),
+
+    // Terms and Conditions
+    termsCheckbox: this.screen.getByText(/I agree to the Terms of Use/i),
+    privacyPolicyLink: this.screen.getByText(/Privacy Policy/i),
+    getStartedButton: this.screen.getByText('Get Started'),
+  };
+}
+```
+
+### Key Methods
+
+#### App Lifecycle Methods
+- `uninstallApp()` - Remove existing app installation
+- `installApp()` - Install APK from `android.apk\SGalertApp.apk`
+- `launchAppFresh()` - Launch app with fresh state
+- `restartSGAlertApp()` - Restart the running app
+
+#### Welcome Screen Methods
+- `navigateWelcomeScreens()` - Navigate all 3 welcome screens (Next → Next → Done)
+- `verifyWelcomeScreen()` - Validate welcome screen elements
+- `clickNextOnWelcome()` - Click Next button
+- `clickSkipOnWelcome()` - Click Skip button
+
+#### Why Permissions Screen Methods
+- `clickContinueIfPresent()` - Handle optional Continue button with try-catch
+- `verifyWhyPermissionsScreen()` - Validate permissions explanation screen
+- `clickContinueOnWhyPermissions()` - Click Continue button
+
+#### Permissions Screen Methods
+- `handlePushNotificationAccess()` - Click Push Notification Access AND handle system "Allow" dialog
+- `verifyPermissionsScreen()` - Validate permissions screen
+- `verifyAllPermissions()` - Check all permission items are visible
+- `verifyPermissionStatuses()` - Verify approved/denied status
+
+#### Terms & Conditions Methods
+- `tapTermsCheckboxByCoordinates()` - Reliable coordinate-based tap at (127, 1972)
+- `acceptTermsOfUse()` - Accept terms using locator
+- `verifyTermsCheckbox()` - Validate terms elements
+- `tapTermsCheckbox()` - Toggle checkbox
+
+#### Get Started Methods
+- `clickGetStartedWithFallback()` - Try text locator first, fallback to coordinates (216, 2640)
+- `clickGetStarted()` - Click using text locator only
+- `verifyGetStartedButton()` - Validate button visibility
+
+#### Main App Screen Methods
+- `verifyMainAppScreen()` - Take screenshot and wait for main screen
+
+#### Complete Flow Methods
+- `completeOnboardingFlowExact()` - **PRIMARY METHOD** - Executes all 6 onboarding steps
+- `completeOnboardingFlow()` - Alternative flow with more validations
+- `completeOnboardingWithSkip()` - Flow using Skip button
+- `navigateToPermissionsScreen()` - Navigate to permissions directly
+
+### Coordinate-Based Interactions
+
+For elements that are difficult to locate reliably, coordinate-based tapping is used:
+
+```typescript
+// Terms checkbox - coordinate tap is more reliable
+await this.screen.tap(127, 1972);
+
+// Get Started button fallback
+await this.screen.tap(216, 2640);
+```
+
+### System Permission Dialog Handling
+
+The implementation properly handles Android system permission dialogs:
+
+```typescript
+// Click the in-app permission item
+const pushNotificationAccess = this.sgAlertPageElements.pushNotificationText;
+await pushNotificationAccess.tap({ timeout: 8000 });
+
+// Handle the system dialog that appears
+const allowButton = this.sgAlertPageElements.allowButton;
+await allowButton.tap({ timeout: 8000 });
+```
+
 The `SGAlertPage` class extends `BasePage` and contains page-specific elements and methods.
 
 ### 1. Element Getter Pattern

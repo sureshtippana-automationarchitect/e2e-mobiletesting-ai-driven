@@ -1,5 +1,15 @@
 # Quick Start: Finding Locators for Mobile Apps
 
+## 🎯 Our Framework's Approach
+
+This project uses a **Centralized Locator Pattern** with all locators in a getter method (see `SGAlertPage.ts`). This guide helps you understand:
+
+1. How to find elements in the mobile UI
+2. How we organize locators centrally
+3. When to use coordinate-based tapping
+
+---
+
 ## The Process (Similar to Web Testing)
 
 ### Web Testing (for comparison)
@@ -71,6 +81,54 @@ await nextButton.tap();
 const emailField = screen.getByLabel('Email');
 await emailField.fill('test@example.com');
 ```
+
+---
+
+## 🎯 Our Implementation: Add to Centralized Locators
+
+Instead of writing locators inline, add them to the `sgAlertPageElements()` getter in `SGAlertPage.ts`:
+
+```typescript
+public get sgAlertPageElements() {
+  return {
+    // Add your new locator here
+    submitButton: this.screen.getByText('Submit'),
+    emailField: this.screen.getByLabel('Email'),
+    loginButton: this.screen.getByTestId('login-btn'),
+  };
+}
+```
+
+Then use in methods:
+```typescript
+async clickSubmit(): Promise<void> {
+  await this.sgAlertPageElements.submitButton.tap();
+}
+```
+
+### Benefits:
+✅ All locators in one place  
+✅ Fresh locators prevent staleness  
+✅ Easy to update when UI changes  
+✅ Type-safe with autocomplete  
+
+---
+
+## 🎯 When Locators Don't Work: Use Coordinates
+
+For stubborn elements (checkboxes, custom controls):
+
+1. **Enable Pointer Location** in Android Developer Options
+2. **Tap the element** and note X, Y coordinates
+3. **Use coordinate tapping**:
+
+```typescript
+async tapCheckbox(): Promise<void> {
+  await this.screen.tap(127, 1972);  // X, Y coordinates
+}
+```
+
+See `tapTermsCheckboxByCoordinates()` in SGAlertPage.ts for real example.
 
 ---
 
@@ -154,7 +212,7 @@ const nextButton = screen.getByTestId('next-button'); // No test ID exists
 | **inspect-ui.js** | View UI anytime | `node inspect-ui.js` |
 | **screen.viewTree()** | View UI in test | Add to test code |
 | **LOCATOR-GUIDE.md** | Full reference | Open the file |
-| **sgalert-navigation.spec.ts** | Working examples | See test file |
+| **sgalert-complete-flow-pom.spec.ts** | Working POM examples | See test file |
 
 ---
 
@@ -162,8 +220,8 @@ const nextButton = screen.getByTestId('next-button'); // No test ID exists
 
 1. ✅ Run your test: `npm test`
 2. ✅ See the UI tree output above
-3. ✅ Try clicking "Next" button using the example test
-4. ✅ Run: `npx mobilewright test tests/sgalert-navigation.spec.ts`
+3. ✅ Try the POM approach with centralized locators
+4. ✅ Run: `npm run test:pom`
 5. ✅ Modify and create your own tests!
 
 ---

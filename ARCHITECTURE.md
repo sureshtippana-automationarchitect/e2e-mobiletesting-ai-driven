@@ -10,10 +10,10 @@ Visual guide to the MobileWright TypeScript Mobile Testing Framework architectur
 ┌─────────────────────────────────────────────────────────────┐
 │                     Test Specifications Layer                │
 │                    (*.spec.ts test files)                    │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │  POM Tests   │  │ Traditional  │  │  Navigation  │      │
-│  │   (5 tests)  │  │   (7 tests)  │  │   (2 tests)  │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│  ┌──────────────┐  ┌──────────────┐                         │
+│  │  POM Test    │  │ Traditional  │                         │
+│  │   (1 test)   │  │   (1 test)   │                         │
+│  └──────────────┘  └──────────────┘                         │
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -21,9 +21,11 @@ Visual guide to the MobileWright TypeScript Mobile Testing Framework architectur
 │                     (pages/ folder)                          │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │              SGAlertPage.ts                             │ │
-│  │  • Centralized Locators                                │ │
+│  │  • Centralized Locators (getter pattern)              │ │
 │  │  • Screen-specific Methods                             │ │
 │  │  • Flow Automation Methods                             │ │
+│  │  • Coordinate-based Interactions                       │ │
+│  │  • System Dialog Handling                              │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
                             ↓
@@ -87,32 +89,51 @@ Visual guide to the MobileWright TypeScript Mobile Testing Framework architectur
 │                    SGAlertPage Class                     │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐ │
-│  │              Locators (Private)                     │ │
+│  │      Centralized Locators (Getter Pattern)         │ │
 │  │  ─────────────────────────────────────────────────  │ │
-│  │  welcomeHeading: 'Welcome to SG Alert'             │ │
-│  │  nextButton: 'Next >'                              │ │
-│  │  skipButton: 'Skip'                                │ │
-│  │  permissionsHeading: 'App Permissions'             │ │
-│  │  termsCheckbox: /I agree to the Terms of Use/i     │ │
+│  │  public get sgAlertPageElements() {                │ │
+│  │    return {                                        │ │
+│  │      welcomeHeading: screen.getByText('Welcome')  │ │
+│  │      nextButton: screen.getByText('Next >')       │ │
+│  │      skipButton: screen.getByText('Skip')         │ │
+│  │      continueButton: screen.getByText('Continue') │ │
+│  │      pushNotificationText: screen.getByText(/Push/i) │ │
+│  │      allowButton: screen.getByText('Allow')       │ │
+│  │      termsCheckbox: screen.getByText(/I agree/i)  │ │
+│  │      getStartedButton: screen.getByText('Get Started') │ │
+│  │    }                                               │ │
+│  │  }                                                 │ │
 │  └────────────────────────────────────────────────────┘ │
 │                            ↓                             │
 │  ┌────────────────────────────────────────────────────┐ │
-│  │           Screen-Specific Methods                   │ │
+│  │      Screen-Specific Interaction Methods           │ │
 │  │  ─────────────────────────────────────────────────  │ │
-│  │  verifyWelcomeScreen()                             │ │
-│  │  clickNextOnWelcome()                              │ │
-│  │  clickSkipOnWelcome()                              │ │
-│  │  verifyPermissionsScreen()                         │ │
-│  │  tapTermsCheckbox()                                │ │
+│  │  navigateWelcomeScreens() - 3 screens              │ │
+│  │  clickContinueIfPresent() - Optional with try-catch│ │
+│  │  handlePushNotificationAccess() - System dialog    │ │
+│  │  tapTermsCheckboxByCoordinates() - Coordinate tap  │ │
+│  │  clickGetStartedWithFallback() - Dual strategy     │ │
 │  └────────────────────────────────────────────────────┘ │
 │                            ↓                             │
 │  ┌────────────────────────────────────────────────────┐ │
-│  │           High-Level Flow Methods                   │ │
+│  │           High-Level Flow Orchestration             │ │
 │  │  ─────────────────────────────────────────────────  │ │
-│  │  completeOnboardingFlow()                          │ │
-│  │  navigateToPermissionsScreen()                     │ │
-│  │  verifyPermissionStatuses()                        │ │
+│  │  completeOnboardingFlowExact()                     │ │
+│  │  ├─ Step 0: Uninstall/Install APK                 │ │
+│  │  ├─ Step 1: Launch app                            │ │
+│  │  ├─ Step 2: Navigate welcome screens              │ │
+│  │  ├─ Step 3: Handle Continue (optional)            │ │
+│  │  ├─ Step 4: Push notification + Allow             │ │
+│  │  ├─ Step 5: Tap terms checkbox (coordinates)      │ │
+│  │  └─ Step 6: Tap Get Started (with fallback)       │ │
 │  └────────────────────────────────────────────────────┘ │
+│                                                          │
+│  Key Features:                                          │
+│  • Getter pattern prevents stale locators              │
+│  • Coordinate-based taps for reliability               │
+│  • System dialog handling separated                    │
+│  • Optional screen handling with try-catch             │
+│  • Text + coordinate fallback strategy                 │
 │                                                          │
 │  Extends: BasePage                                      │
 └─────────────────────────────────────────────────────────┘
@@ -176,9 +197,9 @@ Visual guide to the MobileWright TypeScript Mobile Testing Framework architectur
 │                    Test Execution Flow                      │
 └────────────────────────────────────────────────────────────┘
 
-1. Test File (*.spec.ts)
+1. Test File (sgalert-complete-flow-pom.spec.ts)
    │
-   │  test('Complete onboarding', async ({ screen, device }) => {
+   │  test.only('POM: Complete app onboarding', async ({ screen, device }) => {
    │
    ↓
 2. Initialize Page Object
@@ -186,18 +207,69 @@ Visual guide to the MobileWright TypeScript Mobile Testing Framework architectur
    │  const sgAlertPage = new SGAlertPage(screen, device);
    │
    ↓
-3. Call High-Level Method
+3. Call High-Level Orchestration Method
    │
-   │  await sgAlertPage.completeOnboardingFlow();
+   │  await sgAlertPage.completeOnboardingFlowExact();
    │
    ↓
-4. Execute Screen Methods (SGAlertPage)
+4. Execute 6-Step Flow (SGAlertPage methods)
    │
-   │  await this.launchAppFresh();
-   │  await this.clickNextOnWelcome();
-   │  await this.clickContinueOnWhyPermissions();
-   │  await this.tapTermsCheckbox();
-   │  await this.clickGetStarted();
+   │  Step 0: await this.uninstallApp();
+   │          await this.installApp();
+   │
+   │  Step 1: await this.launchAppFresh();
+   │
+   │  Step 2: await this.navigateWelcomeScreens();
+   │          ├─ Tap sgAlertPageElements.nextButton
+   │          ├─ Tap sgAlertPageElements.nextButton
+   │          └─ Tap sgAlertPageElements.doneButton
+   │
+   │  Step 3: await this.clickContinueIfPresent();
+   │          ├─ Try: sgAlertPageElements.continueButton.tap()
+   │          └─ Catch: Skip if not present
+   │
+   │  Step 4: await this.handlePushNotificationAccess();
+   │          ├─ Tap sgAlertPageElements.pushNotificationText
+   │          └─ Tap sgAlertPageElements.allowButton (system dialog)
+   │
+   │  Step 5: await this.tapTermsCheckboxByCoordinates();
+   │          └─ screen.tap(127, 1972) - Coordinate-based
+   │
+   │  Step 6: await this.clickGetStartedWithFallback();
+   │          ├─ Try: sgAlertPageElements.getStartedButton.tap()
+   │          └─ Fallback: screen.tap(216, 2640)
+   │
+   ↓
+5. Locator Resolution (Getter Pattern)
+   │
+   │  get sgAlertPageElements() {
+   │    return {
+   │      nextButton: this.screen.getByText('Next >'),
+   │      allowButton: this.screen.getByText('Allow'),
+   │      // ... all locators
+   │    }
+   │  }
+   │  // Fresh locators on each access - prevents staleness
+   │
+   ↓
+6. Element Interaction (MobileWright Framework)
+   │
+   │  await element.tap({ timeout: 5000 });
+   │  await screen.tap(x, y); // Coordinate fallback
+   │
+   ↓
+7. Device Communication (MobileCLI + ADB)
+   │
+   │  • Send tap command to device
+   │  • Wait for element response
+   │  • Capture screenshots on failure
+   │
+   ↓
+8. Test Result
+   │
+   │  ✅ "🎉 ONBOARDING COMPLETED SUCCESSFULLY"
+   │  or
+   │  ❌ Failure with automatic screenshot
    │
    ↓
 5. Use Base Methods (BasePage)
@@ -261,10 +333,8 @@ e2e-mobiletesting-ai-driven/
 │   └── README.md                      # ← Page documentation
 │
 ├── tests/                              # Test Specification Layer
-│   ├── sgalert-complete-flow-pom.spec.ts  # ← POM tests (5)
-│   ├── sgalert-complete-flow.spec.ts      # ← Traditional (7)
-│   ├── sgalert-navigation.spec.ts         # ← Navigation (2)
-│   └── sgalert.spec.ts                    # ← Welcome (1)
+│   ├── sgalert-complete-flow-pom.spec.ts  # ← POM test (1)
+│   └── sgalert-complete-flow.spec.ts      # ← Traditional (1)
 │
 ├── apk/                                # Application Binaries
 │   └── android.apk/
@@ -641,7 +711,7 @@ tests/login.spec.ts
 │                                                         │
 │  Code Reusability                                      │
 │  ├── BasePage methods: 15+                             │
-│  ├── Reused across: 15 tests                           │
+│  ├── Reused across: 2 tests                            │
 │  └── Reusability Score: 95%                            │
 │                                                         │
 │  Maintainability                                       │

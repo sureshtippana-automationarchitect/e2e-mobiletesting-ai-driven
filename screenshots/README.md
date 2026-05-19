@@ -2,6 +2,35 @@
 
 This directory stores test execution screenshots organized by datetime-based folders.
 
+## 📸 Automatic Screenshot Capture
+
+Screenshots are captured automatically in two scenarios:
+
+### 1. On Test Failure (Automatic)
+The `test.afterEach()` hook in test files automatically captures screenshots when tests fail:
+
+```typescript
+test.afterEach(async ({ device, screen }, testInfo) => {
+  if (testInfo.status !== 'passed') {
+    await screen.screenshot();
+    console.log('📸 Failure screenshot captured');
+  }
+});
+```
+
+### 2. Manual Capture in Test Code
+You can also capture screenshots manually at any point:
+
+```typescript
+// Using helper method
+await helper.takeScreenshot('Welcome Screen');
+
+// Direct screen API
+await screen.screenshot();
+```
+
+---
+
 ## Folder Structure
 
 ```

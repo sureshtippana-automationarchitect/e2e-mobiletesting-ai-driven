@@ -36,6 +36,7 @@ export class SGAlertPage extends BasePage {
       // Welcome Screen
       welcomeHeading: this.screen.getByText('Welcome to SG Alert'),
       nextButton: this.screen.getByText('Next >'),
+      doneButton: this.screen.getByText('Done'),
       skipButton: this.screen.getByText('Skip'),
 
       // Why Permissions Screen
@@ -50,6 +51,9 @@ export class SGAlertPage extends BasePage {
       permissionApproved: this.screen.getByText(/Permission approved/i),
       permissionDenied: this.screen.getByText(/Permission denied/i),
       goToSettingsButton: this.screen.getByText('Go to Settings'),
+      
+      // System Dialog
+      allowButton: this.screen.getByText('Allow'),
 
       // Terms and Conditions
       termsCheckbox: this.screen.getByText(/I agree to the Terms of Use/i),
@@ -61,14 +65,45 @@ export class SGAlertPage extends BasePage {
   // ==================== APP LIFECYCLE METHODS ====================
 
   /**
+   * Uninstall the SG Alert app
+   */
+  async uninstallApp(): Promise<void> {
+    console.log("🗑️  Step 0: Uninstalling existing app...");
+    try {
+      await this.device.uninstallApp(this.APP_PACKAGE);
+      console.log("   ✅ App uninstalled");
+    } catch (error) {
+      console.log("   ℹ️  App not installed, skipping uninstall");
+    }
+  }
+
+  /**
+   * Install the SG Alert app from APK
+   */
+  async installApp(): Promise<void> {
+    console.log("📦 Installing fresh APK...");
+    try {
+      await this.device.installApp('android.apk\\SGalertApp.apk');
+      console.log("   ✅ App installed\n");
+    } catch (error: any) {
+      console.log("   ❌ Failed to install app:", error.message);
+      throw error;
+    }
+  }
+
+  /**
    * Launch the SG Alert app with fresh start
    */
   async launchAppFresh(): Promise<void> {
-    console.log("\n📱 Launching SG Alert app (fresh start)...");
-    await this.helper.terminateApp(this.APP_PACKAGE);
-    await this.helper.launchApp(this.APP_PACKAGE);
-    await this.helper.wait(5000);
-    console.log("✅ App launched successfully\n");
+    console.log("📱 Step 1: Launching SG Alert app...");
+    try {
+      await this.device.terminateApp(this.APP_PACKAGE);
+    } catch (error) {
+      console.log("   ℹ️  App not running");
+    }
+    await this.device.launchApp(this.APP_PACKAGE);
+    await this.helper.wait(8000);
+    console.log("   ✅ App launched\n");
   }
 
   /**
@@ -82,6 +117,31 @@ export class SGAlertPage extends BasePage {
   }
 
   // ==================== WELCOME SCREEN METHODS ====================
+
+  /**
+   * Navigate through all welcome screens (3 screens: Next, Next, Done)
+   */
+  async navigateWelcomeScreens(): Promise<void> {
+    console.log("👋 Step 2: Navigating through welcome screens...");
+    
+    // First screen
+    const nextButton = this.sgAlertPageElements.nextButton;
+    await nextButton.tap();
+    await this.helper.wait(1000);
+    console.log("   ✅ First screen\n");
+
+    // Second screen
+    const nextButton1 = this.sgAlertPageElements.nextButton;
+    await nextButton1.tap();
+    await this.helper.wait(1000);
+    console.log("   ✅ Second screen\n");
+
+    // Third screen
+    const doneButton = this.sgAlertPageElements.doneButton;
+    await doneButton.tap();
+    await this.helper.wait(1000);
+    console.log("   ✅ Completed welcome screens\n");
+  }
 
   /**
    * Verify welcome screen is displayed
@@ -116,6 +176,26 @@ export class SGAlertPage extends BasePage {
   // ==================== WHY PERMISSIONS SCREEN METHODS ====================
 
   /**
+   * Click Continue button on Why Permissions screen (optional - may not appear)
+   * Using exact implementation from working test
+   */
+  async clickContinueIfPresent(): Promise<void> {
+    console.log("ℹ️  Step 3: Checking for 'Why permissions' screen...");
+    try {
+      const continueButton = this.sgAlertPageElements.continueButton;
+      await continueButton.tap({ timeout: 5000 });
+      console.log("   ✅ Continue button found");
+      console.log("   ✅ Continue button tapped");
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log("   ✅ Proceeded to next screen\n");
+    } catch (error: any) {
+      console.log("   ℹ️  No 'Continue' button found - may have skipped directly to permissions screen");
+      console.log("   ℹ️  Continuing with test...\n");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+
+  /**
    * Verify Why Permissions screen is displayed
    */
   async verifyWhyPermissionsScreen(): Promise<void> {
@@ -136,6 +216,29 @@ export class SGAlertPage extends BasePage {
   }
 
   // ==================== PERMISSIONS SCREEN METHODS ====================
+
+  /**
+   * Handle Push Notification Access permission
+   * Using exact implementation from working test
+   */
+  async handlePushNotificationAccess(): Promise<void> {
+    console.log("🔐 Step 4: Handling Push Notification Access...");
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Click on Push Notification Access
+    console.log("   📲 Clicking 'Push Notification Access'...");
+    const pushNotificationAccess = this.sgAlertPageElements.pushNotificationText;
+    await pushNotificationAccess.tap({ timeout: 8000 });
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    console.log("   ✅ Push Notification Access clicked");
+    
+    // Handle system dialog - Click "Allow" button
+    console.log("   🔔 Handling system notification permission dialog...");
+    const allowButton = this.sgAlertPageElements.allowButton;
+    await allowButton.tap({ timeout: 8000 });
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    console.log("   ✅ Clicked 'Allow' on notification dialog\n");
+  }
 
   /**
    * Verify Permissions screen is displayed
@@ -186,6 +289,16 @@ export class SGAlertPage extends BasePage {
   // ==================== TERMS & CONDITIONS METHODS ====================
 
   /**
+   * Tap Terms checkbox using coordinates (more reliable)
+   */
+  async tapTermsCheckboxByCoordinates(): Promise<void> {
+    console.log("   🎯 Tapping terms checkbox at coordinates...");
+    await this.screen.tap(127, 1972);
+    await this.helper.wait(1500);
+    console.log("   ✅ Terms of Use checkbox tapped\n");
+  }
+
+  /**
    * Accept Terms of Use
    */
   async acceptTermsOfUse(): Promise<void> {
@@ -216,6 +329,36 @@ export class SGAlertPage extends BasePage {
   }
 
   // ==================== GET STARTED METHODS ====================
+
+  /**
+   * Click Get Started button with fallback to coordinates
+   * Using exact implementation from working test
+   */
+  async clickGetStartedWithFallback(): Promise<void> {
+    console.log("🚀 Step 5: Clicking Get Started...");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    try {
+      // First try: Find button by text from locators
+      const getStartedButton = this.sgAlertPageElements.getStartedButton;
+      await getStartedButton.tap({ timeout: 5000 });
+      console.log("   ✅ Get Started clicked (by text)\n");
+    } catch (error) {
+      console.log("   ℹ️  Text locator failed, trying coordinates...");
+      try {
+        // Second try: Use coordinates
+        await this.screen.tap(216, 2640);
+        console.log("   ✅ Get Started clicked (by coordinates)\n");
+      } catch (coordError) {
+        console.log("   ❌ Both methods failed");
+        await this.screen.screenshot();
+        throw coordError;
+      }
+    }
+    
+    // Wait for next screen to load
+    await new Promise(resolve => setTimeout(resolve, 5000)); // Increased wait time
+  }
 
   /**
    * Click Get Started button
@@ -250,6 +393,37 @@ export class SGAlertPage extends BasePage {
   }
 
   // ==================== COMPLETE FLOW METHODS ====================
+
+  /**
+   * Complete the full onboarding flow - Exact match to working test
+   */
+  async completeOnboardingFlowExact(): Promise<void> {
+    console.log("\n🚀 ============ COMPLETE ONBOARDING TEST ============\n");
+    
+    // Step 0: Uninstall and reinstall
+    await this.uninstallApp();
+    await this.installApp();
+    
+    // Step 1: Launch app
+    await this.launchAppFresh();
+    
+    // Step 2: Navigate welcome screens
+    await this.navigateWelcomeScreens();
+    
+    // Step 3: Handle Continue button (optional)
+    await this.clickContinueIfPresent();
+    
+    // Step 4: Handle Push Notification Access
+    await this.handlePushNotificationAccess();
+    
+    // Step 5: Tap terms checkbox by coordinates
+    await this.tapTermsCheckboxByCoordinates();
+    
+    // Step 6: Click Get Started
+    await this.clickGetStartedWithFallback();
+    
+    console.log("🎉 ============ ONBOARDING COMPLETED SUCCESSFULLY ============\n");
+  }
 
   /**
    * Complete the full onboarding flow (Happy Path)

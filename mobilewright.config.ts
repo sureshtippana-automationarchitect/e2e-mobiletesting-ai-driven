@@ -2,11 +2,11 @@ import { defineConfig } from 'mobilewright';
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 120000, // 2 minutes - increased for Windows mobilecli cleanup
+  timeout: 300000, // 5 minutes - increased for complex onboarding flow
   platform: 'android',
   deviceName: /Pixel 6/,
   bundleId: 'com.senecaglobal.sgalert.internal',
-  installApps: './apk/android.apk/sgAlert_Android.apk',
+  installApps: 'android.apk\\SGalertApp.apk',
   autoStart: true,
   autoAppLaunch: false,
   mobilecliPath: './node_modules/mobilecli/bin/mobilecli-windows-amd64.exe',

@@ -6,6 +6,129 @@ Unlike web testing where you use browser DevTools, mobile testing uses the **UI 
 
 ---
 
+## 🎯 Our Implementation: Centralized Locator Pattern
+
+This project uses a **centralized locator pattern** with all locators defined in a getter method:
+
+### Example from SGAlertPage.ts
+
+```typescript
+public get sgAlertPageElements() {
+  return {
+    // Welcome Screen
+    welcomeHeading: this.screen.getByText('Welcome to SG Alert'),
+    nextButton: this.screen.getByText('Next >'),
+    doneButton: this.screen.getByText('Done'),
+    skipButton: this.screen.getByText('Skip'),
+
+    // Why Permissions Screen
+    whyPermissionsHeading: this.screen.getByText('Why are we requesting permissions?'),
+    continueButton: this.screen.getByText('Continue'),
+
+    // Permissions Screen
+    permissionsHeading: this.screen.getByText('App Permissions'),
+    pushNotificationText: this.screen.getByText(/Push Notification Access/i),
+    locationText: this.screen.getByText(/Location Access/i),
+    
+    // System Dialog
+    allowButton: this.screen.getByText('Allow'),
+
+    // Terms and Conditions
+    termsCheckbox: this.screen.getByText(/I agree to the Terms of Use/i),
+    privacyPolicyLink: this.screen.getByText(/Privacy Policy/i),
+    getStartedButton: this.screen.getByText('Get Started'),
+  };
+}
+```
+
+### Benefits of Getter Pattern
+
+✅ **Fresh Locators**: Elements are resolved each time, preventing stale references  
+✅ **Single Source of Truth**: All locators in one place for easy maintenance  
+✅ **Easy Updates**: Change text once, updates everywhere  
+✅ **Type Safety**: TypeScript autocomplete for all elements  
+✅ **Organized by Screen**: Clear structure matching app flow  
+
+### Usage in Methods
+
+```typescript
+async navigateWelcomeScreens(): Promise<void> {
+  // Get fresh locator from getter
+  const nextButton = this.sgAlertPageElements.nextButton;
+  await nextButton.tap();
+  
+  // Use directly
+  await this.sgAlertPageElements.doneButton.tap();
+}
+```
+
+---
+
+## 🎯 Coordinate-Based Interactions
+
+For elements that are difficult to locate reliably, we use coordinate-based tapping:
+
+### When to Use Coordinates
+
+- ✅ Checkboxes that don't respond to element taps
+- ✅ Custom UI elements without proper accessibility
+- ✅ Fallback when text locators fail
+- ❌ Avoid for dynamic layouts (coordinates change)
+- ❌ Not for different screen sizes/densities
+
+### Implementation Examples
+
+```typescript
+// Terms checkbox - More reliable than element locator
+async tapTermsCheckboxByCoordinates(): Promise<void> {
+  await this.screen.tap(127, 1972);
+  await this.helper.wait(1500);
+}
+
+// Get Started with fallback strategy
+async clickGetStartedWithFallback(): Promise<void> {
+  try {
+    // Primary: Try text locator
+    const getStartedButton = this.sgAlertPageElements.getStartedButton;
+    await getStartedButton.tap({ timeout: 5000 });
+  } catch (error) {
+    // Fallback: Use coordinates
+    await this.screen.tap(216, 2640);
+  }
+}
+```
+
+### Finding Coordinates
+
+1. Enable "Pointer Location" in Developer Options
+2. Tap the element you want to interact with
+3. Note the X and Y coordinates shown on screen
+4. Use those coordinates in your test
+
+---
+
+## 🎯 System Dialog Handling
+
+Android system dialogs (like permission requests) require separate handling:
+
+```typescript
+// 1. Click the in-app permission item
+const pushNotificationAccess = this.sgAlertPageElements.pushNotificationText;
+await pushNotificationAccess.tap({ timeout: 8000 });
+
+// 2. Handle the system dialog that appears
+const allowButton = this.sgAlertPageElements.allowButton;
+await allowButton.tap({ timeout: 8000 });
+```
+
+**Key Points:**
+- System dialogs have their own UI hierarchy
+- Require separate locators (not nested in app structure)
+- Often need longer timeouts for animation
+- "Allow", "Deny", "Don't Allow" are common system buttons
+
+---
+
 ## Method 1: Inspect UI During Tests
 
 Add this to your test to see all elements:
